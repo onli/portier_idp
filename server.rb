@@ -72,7 +72,7 @@ post '/login' do
                     "email": params[:name]
                 }
         token = JWT.encode payload, rsa_private, 'RS256'
-        redirect params[:redirect_uri] + '?id_token=' + token, 303
+        redirect params[:redirect_uri] + '#id_token=' + token, 303
     end
 end
 
