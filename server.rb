@@ -26,7 +26,8 @@ end
 get '/.well-known/webfinger' do
     if (params[:rel] == 'https://portier.io/specs/auth/1.0/idp')
         email = params[:resource].gsub('acct:', '')
-
+        content_type :json
+        
         return JSON.generate({
             "subject": "acct:" + email,
             "links":
@@ -44,7 +45,14 @@ end
 # The jwks_uri endpoint (/.well_known/jwks) and the auth base (/login), both
 # given as absolute urls
 get '/.well-known/openid-configuration' do
-
+    content_type :json
+    JSON.generate(
+        {
+            "issuer": ownUrl,
+            "authorization_endpoint": ownUrl + "/login",
+            "jwks_uri": ownUrl + "/.well-known/jwks"
+        }
+    ).to_s
 end
 
 # Show a login form where users can authenticate to the IdP with their
@@ -62,7 +70,7 @@ end
 # Echo the jwks, the keyset used to sign the web tokens. Portier fetches this
 # at the end to confirm the jwt supposed to confirm the login
 get '/.well-known/jwks' do
-    header 'Content-Type: application/json'
+    content_type :json
     JSON.generate({
         "kty": "RSA",
         "alg": "RS256",
