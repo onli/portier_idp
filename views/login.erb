@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portier IdP prototype</title>
+    <style type="text/css">body{margin:40px
+auto;max-width:650px;line-height:1.6;color:#444;padding:0
+10px}h1,h2,h3{line-height:1.2}</style>
+<body>
+    <h1>Login</h1>
+    <form method="POST" action="<%= url '/login' %>" >
+        <input name="name" type="email" placeholder="test@localhost">
+        <input name="password" type="password" placeholder="test">
+        <input name="redirect_uri" type="hidden" value="<%= redirect_uri %>">
+        <input name="state" type="hidden" value="<%= state %>">
+        <input name="nonce" type="hidden" value="<%= nonce %>">
+        <button>Ok</button
+    </form>
+    
+</body>
+</html>

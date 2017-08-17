@@ -58,13 +58,22 @@ end
 # Show a login form where users can authenticate to the IdP with their
 # password. A real IdP would support things like LDAP, but we keep it simple
 get '/login' do
-
+    erb :login, :locals => {:redirect_uri => params[:redirect_uri], :state => params[:state], :nonce => params[:nonce] }
 end
 
 # Confirm the entered login for this IdP and user, then create the jwt and
 # redirect the user back to portier with it
 post '/login' do
-
+    if params[:password] == "test"  # TODO: proper password and account management
+        payload = { "iss": ownUrl,
+                    "aud": URI.parse(params[:redirect_uri]).host,        
+                    "exp": Time.now.to_i + 60,
+                    "email_verified": true,
+                    "email": params[:name]
+                }
+        token = JWT.encode payload, rsa_private, 'RS256'
+        redirect params[:redirect_uri] + '?id_token=' + token, 303
+    end
 end
 
 # Echo the jwks, the keyset used to sign the web tokens. Portier fetches this
