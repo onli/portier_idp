@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'base64'
 require 'inifile'
+require 'jwt'
 
 rsa_public = nil
 # TODO: It would be better not to have the key as global variables, but to load them only when needed
@@ -27,7 +28,7 @@ get '/.well-known/webfinger' do
     if (params[:rel] == 'https://portier.io/specs/auth/1.0/idp')
         email = params[:resource].gsub('acct:', '')
         content_type :json
-        
+
         return JSON.generate({
             "subject": "acct:" + email,
             "links":
@@ -65,14 +66,18 @@ end
 # redirect the user back to portier with it
 post '/login' do
     if params[:password] == "test"  # TODO: proper password and account management
+        aud = URI.parse(params[:redirect_uri])
+        aud.query = aud.fragment = nil
+        aud.path = ''
+
         payload = { "iss": ownUrl,
-                    "aud": URI.parse(params[:redirect_uri]).host,        
+                    "aud": aud.to_s,
                     "exp": Time.now.to_i + 60,
-                    "email_verified": true,
+                    "nonce": params[:nonce],
                     "email": params[:name]
                 }
-        token = JWT.encode payload, rsa_private, 'RS256'
-        redirect params[:redirect_uri] + '#id_token=' + token, 303
+        token = JWT.encode payload, rsa_private, 'RS256', { :kid => 'main' }
+        redirect "#{params[:redirect_uri]}#id_token=#{token}&state=#{params[:state]}", 303
     end
 end
 
@@ -81,10 +86,15 @@ end
 get '/.well-known/jwks' do
     content_type :json
     JSON.generate({
-        "kty": "RSA",
-        "alg": "RS256",
-        "use": "sig",
-        "n": Base64.urlsafe_encode64(rsa_public.params['n'].to_s),
-        "e": Base64.urlsafe_encode64(rsa_public.params['e'].to_s),
+      "keys": [
+        {
+          "kid": "main",
+          "kty": "RSA",
+          "alg": "RS256",
+          "use": "sig",
+          "n": Base64.urlsafe_encode64(rsa_public.params['n'].to_bn.to_s(2)),
+          "e": Base64.urlsafe_encode64(rsa_public.params['e'].to_bn.to_s(2)),
+        }
+      ]
     }).to_s
 end
