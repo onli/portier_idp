@@ -25,21 +25,19 @@ end
 # the webfinger endpoint confirms to portier that a user is registered,
 # and that this service supports portier as auth method
 get '/.well-known/webfinger' do
-    if (params[:rel] == 'https://portier.io/specs/auth/1.0/idp')
-        email = params[:resource].gsub('acct:', '')
-        content_type :json
+    email = params[:resource].gsub('acct:', '')
+    content_type :json
 
-        return JSON.generate({
-            "subject": "acct:" + email,
-            "links":
-                [
-                {
-                "rel": "https://portier.io/specs/auth/1.0/idp",
-                "href": ownUrl
-                }
-                ]
-            }).to_s
-    end
+    return JSON.generate({
+        "subject": "acct:" + email,
+        "links":
+            [
+            {
+            "rel": "https://portier.io/specs/auth/1.0/idp",
+            "href": ownUrl
+            }
+            ]
+        }).to_s
 end
 
 # Portier then gets this endpoint, which has two relevant information:
