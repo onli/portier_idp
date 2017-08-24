@@ -1,7 +1,12 @@
+require './database.rb'
+require './user.rb'
+
 require 'sinatra'
 require 'base64'
 require 'inifile'
 require 'jwt'
+
+
 
 rsa_public = nil
 # TODO: It would be better not to have the key as global variables, but to load them only when needed
@@ -20,6 +25,22 @@ configure do
     # Read the absolute URL from the config.ini
     config = IniFile.load('config.ini')
     ownUrl = config['main']['url']
+end
+
+get '/users' do
+    erb :users, :locals => {:users => Database.instance.getUsers}
+end
+
+post '/addUser' do
+    user = User.new(name: params[:name])
+    user.setPassword(password: params[:password])
+    user.save!
+    redirect :users
+end
+
+post '/removeUser' do
+    User.new(name: params[:name]).remove
+    redirect :users
 end
 
 # the webfinger endpoint confirms to portier that a user is registered,
@@ -63,7 +84,7 @@ end
 # Confirm the entered login for this IdP and user, then create the jwt and
 # redirect the user back to portier with it
 post '/login' do
-    if params[:password] == "test"  # TODO: proper password and account management
+    if User.new(name: params[:name]).validPassword(password: params[:password])
         aud = URI.parse(params[:redirect_uri])
         aud.query = aud.fragment = nil
         aud.path = ''
