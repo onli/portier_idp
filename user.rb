@@ -9,12 +9,12 @@ class User
         self.name = name
         self.password = Database.instance.getUserPassword(name: name)
         if self.password
-            self.password = BCrypt::Password.create(password)
+            self.password = BCrypt::Password.new(self.password.to_s)
         end
     end
 
     def setPassword(password:)
-        self.password = BCrypt::Password.create(password)
+        self.password = BCrypt::Password.create(password.to_s)
     end
 
     def remove()
@@ -26,6 +26,6 @@ class User
     end
 
     def validPassword(password:)
-        return password && self.password && password == self.password
+        return password && self.password && self.password == password.to_s
     end
 end
