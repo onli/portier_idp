@@ -31,7 +31,7 @@ portier_idp has some very basic user management, a method to add email addresses
  * POST `/addUser`
  * POST `/removeUser`
  
-portier_idp will automatically generate the RSA key needed to generate the JWKS, and change it on every restart. That key is used to sign the JWT given to the broker if the provided password is correct. But you can also provide your own key under **rsa.pem**:
+portier_idp will automatically generate the RSA key needed to generate the JWKS, and change it on every restart. That key is used to sign the JWT given to the broker if the provided password is correct. But you can also provide your own key in the project root directory as **rsa.pem**:
 
 ```
 openssl genpkey -algorithm RSA -out rsa.pem -pkeyopt rsa_keygen_bits:4096
