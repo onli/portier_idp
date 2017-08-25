@@ -17,14 +17,22 @@ cd portier_idp
 bundle install
 ```
 
+Note: portier_idp has to serve files under `/.well-known/`, that might be problematic if you want to mix it with other web services.
+
 ## Important: Configuration
 
 Set the url where this software will be served from in `confing.ini`.
 
-Your webserver has to run under `https` to be accepted by a portier broker.
+Your webserver has to run under `https` to be accepted by a portier broker. You most likely want to run this software behind an apache or nginx proxy.
 
 portier_idp has some very basic user management, a method to add email addresses and their password. Go to `/users` to add email addresses and passwords. You need to secure these endpoints manually for now, for example with basic http authentication:
 
  * GET `/users`
  * POST `/addUser`
  * POST `/removeUser`
+ 
+ ## Start
+ 
+ ```
+ bundle exec rackup -E development -p 9292
+ ```
